@@ -102,6 +102,9 @@ func New() *Bonafide {
 		log.Println("Error loading SystemCertPool, falling back to empty pool")
 		certs = x509.NewCertPool()
 	}
+
+	log.Println("Appending CaCert:", string(config.CaCert))
+
 	certs.AppendCertsFromPEM(config.CaCert)
 	client := &http.Client{
 		Transport: &http.Transport{
@@ -362,19 +365,10 @@ func (b *Bonafide) GetGatewayByIP(ip string) (Gateway, error) {
 }
 
 func (b *Bonafide) fetchGatewaysFromMenshen() error {
-	/* FIXME in float deployments, geolocation is served on
-	* gemyip.domain/json, with a LE certificate, but in riseup is served
-	* behind the api certificate.  So this is a workaround until we
-	* streamline that behavior */
 	resp, err := b.client.Post(config.GeolocationAPI, "", nil)
 	if err != nil {
-		client := &http.Client{}
-		_resp, err := client.Post(config.GeolocationAPI, "", nil)
-		if err != nil {
-			log.Printf("ERROR: could not fetch geolocation: %s\n", err)
-			return err
-		}
-		resp = _resp
+		log.Printf("ERROR: could not fetch geolocation: %s\n", err)
+		return err
 	}
 
 	defer resp.Body.Close()

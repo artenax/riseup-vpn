@@ -1,0 +1,21 @@
+{
+    "default": "Bitmask",
+    "providers": [
+        {
+            "name": "Bitmask",
+            "applicationName": "BitmaskVPN",
+            "binaryName": "riseup-vpn",
+            "auth": "anon",
+            "authEmptyPass": false,
+            "providerURL": "bitmask-dev.leapvpn.net",
+            "tosURL": "https://bitmask-dev.leapvpn.net/tos",
+            "helpURL": "https://bitmask-dev.leapvpn.net/support",
+            "askForDonations": false,
+            "donateURL": "https://bitmask-dev.leapvpn.net/donate",
+            "apiURL": "https://api.bitmask-dev.leapvpn.net/",
+            "geolocationAPI": "https://menshen.bitmask-dev.leapvpn.net/json",
+            "caCertString": "-----BEGIN CERTIFICATE-----\nMIIBYjCCAQigAwIBAgIBATAKBggqhkjOPQQDAjAXMRUwEwYDVQQDEwxMRUFQIFJv\nb3QgQ0EwHhcNMjMwMzAzMDAxOTI3WhcNMjgwMzAzMDAyNDI3WjAXMRUwEwYDVQQD\nEwxMRUFQIFJvb3QgQ0EwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAATpKBDlpwh8\nOUNgQPKvSMA6CtCX8vRGVKv87UK3eHKWMWcS1CNhRN+2DmGZixrLOdeQmbYXZHHO\nz53858S3ZXlTo0UwQzAOBgNVHQ8BAf8EBAMCAqQwEgYDVR0TAQH/BAgwBgEB/wIB\nATAdBgNVHQ4EFgQUGDFd7M3bYQQJ33bXs/VNgg7u4QwwCgYIKoZIzj0EAwIDSAAw\nRQIgQjdt3ipr7VnOnrpJEMAf/U+Ue/FqqmvP/aD4YSislxICIQDiUT9U+8gmNUIq\n1lQPtYSQDO+fmIAkYiKYH0ljP8KIVw==\n-----END CERTIFICATE-----\n",
+            "timeStamp": "2022-03-20 01:00:02"
+        }
+    ]
+}
