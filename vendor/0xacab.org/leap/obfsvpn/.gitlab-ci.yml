@@ -1,8 +1,20 @@
 ---
+include:
+  - 'https://0xacab.org/leap/container-platform/glue/raw/master/.gitlab-ci.yml'
+
+# Combined with the above include statement, these will be for building the obfsvpn server image
+variables:
+  DOCKERFILE: ./images/obfsvpn/Dockerfile
+  IMAGE_TAG: $CI_REGISTRY_IMAGE:server-$CI_COMMIT_REF_SLUG
+  RELEASE_TAG: $CI_REGISTRY_IMAGE:server-latest
+  PREVIOUS_RELEASE_TAG: $CI_REGISTRY_IMAGE:server-previous
 
 stages:
   - test
   - validate
+  - integration-test
+  - build
+  - release
 
 test:
   image: golang:alpine
@@ -18,7 +30,7 @@ validate:
   image: golang:alpine
   stage: test
   script: |
-      apk add build-base git
+      apk add build-base git jq curl
       go version
       go env
 
@@ -31,10 +43,52 @@ validate:
       gofmt -s -l . && [ -z "$(gofmt -s -l .)" ]
 
       # See: https://staticcheck.io/docs/checks
-      staticcheck -checks inherit,ST1000,ST1016,ST1020,ST1021,ST1022,ST1023 ./...
+      staticcheck -checks inherit,ST1016,ST1020,ST1021,ST1022,ST1023 ./...
       # gosec does not handle modules correctly.
       # See: https://github.com/securego/gosec/issues/622
       gosec ./...
+      make check-yawning-obfs4
 
       go mod tidy
       git diff --exit-code -- go.mod go.sum
+
+integration-test-default:
+  image: docker:dind
+  stage: test
+  services:
+    - name: docker:dind
+      alias: docker
+  script:
+    - apk add --update bash
+    - /bin/bash ./scripts/integration-test.sh
+  tags:
+    - linux
+    - docker-in-docker
+
+integration-test-hopping:
+  image: docker:dind
+  stage: test
+  services:
+    - name: docker:dind
+      alias: docker
+  script:
+    - apk add --update bash
+    - /bin/bash ./scripts/integration-test.sh hop
+  tags:
+    - linux
+    - docker-in-docker
+
+# We can build the client separately here
+build-client:
+  extends: build
+  variables:
+    DOCKERFILE: ./images/obfsvpn-client/Dockerfile
+    IMAGE_TAG: $CI_REGISTRY_IMAGE:client-$CI_COMMIT_REF_SLUG
+
+release-client:
+  extends: release
+  variables:
+    DOCKERFILE: ./images/obfsvpn-client/Dockerfile
+    IMAGE_TAG: $CI_REGISTRY_IMAGE:client-$CI_COMMIT_REF_SLUG
+    RELEASE_TAG: $CI_REGISTRY_IMAGE:client-latest
+    PREVIOUS_RELEASE_TAG: $CI_REGISTRY_IMAGE:client-previous

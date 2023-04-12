@@ -1,5 +1,7 @@
 client/client
 server/server
-obfsvpn-client
+cmd/client/client
+cmd/server/server
+/obfsvpn-client
 *.swp
 *.swo

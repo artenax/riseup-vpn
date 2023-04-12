@@ -1,0 +1,81 @@
+version: "3.3"
+
+services:
+  openvpn-server:
+    build:
+      dockerfile: ./images/openvpn-server/Dockerfile
+      context: ./
+    cap_add:
+      - NET_ADMIN
+    # restart: always
+    volumes:
+      - "ovpn_data:/opt/openvpn-server/data"
+    environment:
+      PROTO: "$PROTO"
+      TUN_MTU: 48000
+    command: "/opt/openvpn-server/start.sh"
+
+  obfsvpn-1:
+    build:
+      dockerfile: ./images/obfsvpn/Dockerfile
+      context: ./
+    cap_add:
+      - NET_ADMIN
+    # restart: always
+    environment:
+      PROTO: "$PROTO"
+      KCP: "0"
+      OBFS4_HOST: "0.0.0.0"
+      OPENVPN_HOST: "openvpn-server"
+      OPENVPN_PORT: "5540"
+      HOP_PT: "$HOP_PT"
+      OBFS4_KEY_FILE: "/opt/obfsvpn/obfsvpn-server-test-data/obfs4.json"
+      # only necessary for traditional/non-hopping mode
+      OBFS4_PORT: "4430"
+    command: "/opt/obfsvpn/start_obfsvpn.sh"
+
+  obfsvpn-2:
+    build:
+      dockerfile: ./images/obfsvpn/Dockerfile
+      context: ./
+    cap_add:
+      - NET_ADMIN
+    # restart: always
+    environment:
+      PROTO: "$PROTO"
+      KCP: "0"
+      OBFS4_HOST: "0.0.0.0"
+      OPENVPN_HOST: "openvpn-server"
+      OPENVPN_PORT: "5540"
+      HOP_PT: "$HOP_PT"
+      OBFS4_KEY_FILE: "/opt/obfsvpn/obfsvpn-server-test-data/obfs4.json"
+      # only necessary for traditional/non-hopping mode
+      OBFS4_PORT: "4430"
+    command: "/opt/obfsvpn/start_obfsvpn.sh"
+
+  client:
+    build:
+      dockerfile: ./images/obfsvpn-client/Dockerfile
+      context: ./
+    cap_add:
+      - NET_ADMIN
+    restart: always
+    volumes:
+      - "ovpn_data:/vpn"
+    environment:
+      PROTO: "$PROTO"
+      KCP: "0"
+      OBFS4_SERVER_HOST1: "obfsvpn-1"
+      OBFS4_SERVER_HOST2: "obfsvpn-2"
+      HOP_PT: "$HOP_PT"
+      # the minimum number of seconds to wait before hopping
+      MIN_HOP_SECONDS: 5
+      # a random range to wait in addition to the minimum hop time
+      HOP_JITTER: 5
+      # only necessary for traditional/non-hopping mode
+      OBFS4_PORT: "4430"
+      TUN_MTU: 48000
+    command: "/usr/bin/start.sh"
+
+volumes:
+  ovpn_data:
