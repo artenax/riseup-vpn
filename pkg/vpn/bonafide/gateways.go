@@ -32,7 +32,7 @@ type Gateway struct {
 	CountryCode  string
 	Ports        []string
 	Protocols    []string
-	Options      map[string]string
+	Options      map[string]any
 	Transport    string
 }
 

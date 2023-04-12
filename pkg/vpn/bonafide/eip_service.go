@@ -59,7 +59,7 @@ type transportV3 struct {
 	Type      string
 	Protocols []string
 	Ports     []string
-	Options   map[string]string
+	Options   map[string]any
 }
 
 func (b *Bonafide) setupAuthentication(i interface{}) {

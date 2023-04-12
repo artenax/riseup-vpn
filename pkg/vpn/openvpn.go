@@ -72,7 +72,8 @@ func (b *Bitmask) startTransportForPrivateBridge(gw bonafide.Gateway) (proxy str
 	if os.Getenv("LEAP_KCP") == "1" {
 		kcpMode = true
 	}
-	b.obfsvpnProxy = obfsvpn.NewClient(kcpMode, proxyAddr, gw.Options["cert"])
+	crt := gw.Options["cert"].(string)
+	b.obfsvpnProxy = obfsvpn.NewClient(kcpMode, proxyAddr, crt)
 	go func() {
 		_, err = b.obfsvpnProxy.Start()
 		if err != nil {
@@ -118,7 +119,8 @@ func (b *Bitmask) startTransport(host string) (proxy string, err error) {
 
 		log.Println("connecting with cert:", gw.Options["cert"])
 
-		b.obfsvpnProxy = obfsvpn.NewClient(kcpMode, proxyAddr, gw.Options["cert"])
+		crt := gw.Options["cert"].(string)
+		b.obfsvpnProxy = obfsvpn.NewClient(kcpMode, proxyAddr, crt)
 		go func() {
 			_, err = b.obfsvpnProxy.Start()
 			if err != nil {
@@ -145,7 +147,7 @@ func maybeGetPrivateGateway() (bonafide.Gateway, bool) {
 	bridgeArgs := strings.Split(privateBridge, ":")
 	gw.Host = bridgeArgs[0]
 	gw.Ports = []string{bridgeArgs[1]}
-	opt := make(map[string]string)
+	opt := make(map[string]any)
 	opt["cert"] = obfs4Cert
 	gw.Options = opt
 	return gw, true
@@ -337,12 +339,13 @@ func (b *Bitmask) getCert() (certPath string, err error) {
 	return certPath, err
 }
 
-// Explicit call to GetGateways, to be able to fetch them all before starting the vpn
+// fetchGateways calls explicitely to GetGateways, to be able to fetch them all
+// before starting the vpn
 func (b *Bitmask) fetchGateways() {
 	log.Println("Fetching gateways...")
 	_, err := b.bonafide.GetAllGateways(b.transport)
 	if err != nil {
-		log.Println("ERROR Cannot fetch gateways")
+		log.Println("ERROR Cannot fetch gateways:", err)
 	}
 }
 
