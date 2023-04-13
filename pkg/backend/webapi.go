@@ -117,16 +117,22 @@ func enableWebAPI(port int) {
 	log.Println("Starting WebAPI in port", port)
 	bitmask.GenerateAuthToken()
 	token := bitmask.ReadAuthToken()
-	http.Handle("/vpn/start", CheckAuth(http.HandlerFunc(webOn), token))
-	http.Handle("/vpn/stop", CheckAuth(http.HandlerFunc(webOff), token))
-	http.Handle("/vpn/gw/get", CheckAuth(http.HandlerFunc(webGatewayGet), token))
-	http.Handle("/vpn/gw/set", CheckAuth(http.HandlerFunc(webGatewaySet), token))
-	http.Handle("/vpn/gw/list", CheckAuth(http.HandlerFunc(webGatewayList), token))
-	http.Handle("/vpn/transport/get", CheckAuth(http.HandlerFunc(webTransportGet), token))
-	http.Handle("/vpn/transport/set", CheckAuth(http.HandlerFunc(webTransportSet), token))
-	http.Handle("/vpn/transport/list", CheckAuth(http.HandlerFunc(webTransportList), token))
-	http.Handle("/vpn/status", CheckAuth(http.HandlerFunc(webStatus), token))
-	http.Handle("/vpn/quit", CheckAuth(http.HandlerFunc(webQuit), token))
+
+	handle := func(pattern string, fn func(w http.ResponseWriter, r *http.Request)) {
+		http.Handle(pattern, CheckAuth(http.HandlerFunc(fn), token))
+	}
+
+	handle("/vpn/start", webOn)
+	handle("/vpn/stop", webOff)
+	handle("/vpn/gw/get", webGatewayGet)
+	handle("/vpn/gw/set", webGatewaySet)
+	handle("/vpn/gw/list", webGatewayList)
+	handle("/vpn/transport/get", webTransportGet)
+	handle("/vpn/transport/set", webTransportSet)
+	handle("/vpn/transport/list", webTransportList)
+	handle("/vpn/status", webStatus)
+	handle("/vpn/quit", webQuit)
+
 	http.ListenAndServe(":"+strconv.Itoa(port), nil)
 }
 
