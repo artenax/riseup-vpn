@@ -338,6 +338,10 @@ func (b *Bonafide) ListLocationLabels(transport string) map[string][]string {
 	return b.gateways.listLocationLabels(transport)
 }
 
+func (b *Bonafide) ListAllTransports() []string {
+	return b.gateways.listAllTransports()
+}
+
 func (b *Bonafide) SetManualGateway(label string) {
 	b.gateways.setUserChoice(label)
 }

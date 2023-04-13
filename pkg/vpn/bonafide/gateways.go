@@ -8,6 +8,8 @@ import (
 	"sort"
 	"strconv"
 	"time"
+
+	"golang.org/x/exp/slices"
 )
 
 const (
@@ -118,7 +120,7 @@ func (p *gatewayPool) listLocationFullness(transport string) map[string]float64 
 	return cm
 }
 
-/* returns a map of location: labels for the ui to use */
+// listLocationFullness returns a map of location: labels for the ui to use
 func (p *gatewayPool) listLocationLabels(transport string) map[string][]string {
 	cm := make(map[string][]string)
 	locations := p.getLocations()
@@ -132,7 +134,20 @@ func (p *gatewayPool) listLocationLabels(transport string) map[string][]string {
 	return cm
 }
 
-/* this method should only be used if we have no usable menshen list. */
+func (p *gatewayPool) listAllTransports() []string {
+	tr := []string{}
+	for _, gw := range p.available {
+		if !slices.Contains(tr, gw.Transport) {
+			tr = append(tr, gw.Transport)
+		}
+	}
+	return tr
+}
+
+// getRandomGatewaysByLocation accepts a location and transport, and returns an
+// array with the available gateways, and an error if the operation did not
+// succeed.
+// This method should only be used if we have no usable menshen list.
 func (p *gatewayPool) getRandomGatewaysByLocation(location, transport string) ([]Gateway, error) {
 	if !p.isValidLocation(location) {
 		return []Gateway{}, errors.New("bonafide: BUG not a valid location: " + location)

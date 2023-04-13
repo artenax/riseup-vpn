@@ -12,6 +12,8 @@ import (
 	"0xacab.org/leap/bitmask-vpn/pkg/bitmask"
 )
 
+var vpnTransports = []string{"openvpn", "obfs4", "obfs4-hop", "obfs4-kcp"}
+
 func CheckAuth(handler http.HandlerFunc, token string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		t := r.Header.Get("X-Auth-Token")
@@ -58,6 +60,7 @@ func webGatewaySet(w http.ResponseWriter, r *http.Request) {
 		time.Sleep(500 * time.Millisecond)
 		SwitchOn()
 	default:
+		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(w, "Only POST supported.")
 	}
 }
@@ -66,6 +69,7 @@ func webGatewayList(w http.ResponseWriter, r *http.Request) {
 	transport := ctx.bm.GetTransport()
 	locationJson, err := json.Marshal(ctx.bm.ListLocationFullness(transport))
 	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(w, "Error converting json: %v", err)
 	}
 	fmt.Fprintf(w, string(locationJson))
@@ -74,6 +78,7 @@ func webGatewayList(w http.ResponseWriter, r *http.Request) {
 func webTransportGet(w http.ResponseWriter, r *http.Request) {
 	t, err := json.Marshal(ctx.bm.GetTransport())
 	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(w, "Error converting json: %v", err)
 	}
 	fmt.Fprintf(w, string(t))
@@ -100,11 +105,12 @@ func webTransportSet(w http.ResponseWriter, r *http.Request) {
 }
 
 func webTransportList(w http.ResponseWriter, r *http.Request) {
-	t, err := json.Marshal([]string{"openvpn", "obfs4"})
+	trList, err := json.Marshal(ctx.bm.ListTransport())
 	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(w, "Error converting json: %v", err)
 	}
-	fmt.Fprintf(w, string(t))
+	fmt.Fprintf(w, string(trList))
 }
 
 func webQuit(w http.ResponseWriter, r *http.Request) {
@@ -137,7 +143,7 @@ func enableWebAPI(port int) {
 }
 
 func isValidTransport(t string) bool {
-	for _, b := range []string{"openvpn", "obfs4"} {
+	for _, b := range vpnTransports {
 		if b == t {
 			return true
 		}

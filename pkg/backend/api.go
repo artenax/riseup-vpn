@@ -81,6 +81,11 @@ func UseAutomaticGateway() {
 	}
 }
 
+func ListTransport() *C.char {
+	tr, _ := json.Marshal(ctx.bm.ListTransport())
+	return C.CString(string(tr))
+}
+
 func SetTransport(label string) {
 	err := ctx.bm.SetTransport(label)
 	if err != nil {

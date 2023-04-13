@@ -167,20 +167,6 @@ func (b *Bitmask) generateManagementPassword() string {
 
 func (b *Bitmask) startOpenVPN() error {
 	arg := b.openvpnArgs
-	/*
-		XXX has this changed??
-		 arg, err := b.bonafide.GetOpenvpnArgs()
-		 if err != nil {
-		 	return err
-		 }
-	*/
-	/*
-		XXX and this??
-		 certPemPath, err := b.getCert()
-		 if err != nil {
-		 	return err
-		 }
-	*/
 	b.statusCh <- Starting
 	if b.GetTransport() == "obfs4" {
 		var gw bonafide.Gateway
@@ -469,6 +455,11 @@ func (b *Bitmask) UseAutomaticGateway() {
 	b.bonafide.SetAutomaticGateway()
 }
 
+// ListTransport returns the list of available transports.
+func (b *Bitmask) ListTransport() []string {
+	return b.bonafide.ListAllTransports()
+}
+
 // SetTransport selects an obfuscation transport to use
 func (b *Bitmask) SetTransport(t string) error {
 	if t != "openvpn" && t != "obfs4" {
@@ -487,11 +478,13 @@ func (b *Bitmask) SetTransport(t string) error {
 	return nil
 }
 
-// GetTransport gets the obfuscation transport to use. Only obfs4 available for now.
+// GetTransport gets the obfuscation transport to use.
 func (b *Bitmask) GetTransport() string {
-	if b.transport == "obfs4" {
-		return "obfs4"
-	} else {
+	t := b.transport
+	switch b.transport {
+	case "obfs4", "obfs4-kcp", "obfs4-hop":
+		return t
+	default:
 		return "openvpn"
 	}
 }

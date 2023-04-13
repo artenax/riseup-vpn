@@ -22,7 +22,10 @@ require (
 	golang.org/x/sys v0.7.0
 )
 
-require github.com/natefinch/npipe v0.0.0-20160621034901-c1b8fa8bdcce
+require (
+	github.com/natefinch/npipe v0.0.0-20160621034901-c1b8fa8bdcce
+	golang.org/x/exp v0.0.0-20230321023759-10a507213a29
+)
 
 require (
 	filippo.io/edwards25519 v1.0.0 // indirect
@@ -45,10 +48,8 @@ require (
 	github.com/pion/sdp/v3 v3.0.6 // indirect
 	github.com/pion/srtp/v2 v2.0.12 // indirect
 	github.com/pion/stun v0.4.0 // indirect
-	github.com/pion/transport v0.14.1 // indirect
 	github.com/pion/transport/v2 v2.1.0 // indirect
 	github.com/pion/turn/v2 v2.1.0 // indirect
-	github.com/pion/udp v0.1.4 // indirect
 	github.com/pion/udp/v2 v2.0.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/smartystreets/assertions v0.0.0-20180927180507-b2de0cb4f26d // indirect
