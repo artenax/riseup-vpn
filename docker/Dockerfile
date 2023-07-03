@@ -1,5 +1,5 @@
 # An image to build and package the BitmaskVPN (RiseupVPN and other branded builds)
-# (c) LEAP Encryption Access Project 2018-2021
+# (c) LEAP Encryption Access Project 2018-2023
 
 FROM ubuntu:20.04 as builder
 
@@ -24,13 +24,14 @@ RUN apt-get update && apt-get upgrade --yes && \
             libssl-dev bash patch tar \
             xz-utils bzip2 gzip sed cpio libbz2-dev \
             software-properties-common dh-golang \
-            jq \
+            jq qt5dxcb-plugin \
             squashfs-tools \
             qtbase5-dev qttools5-dev-tools qt5-qmake g++ qtdeclarative5-dev qt5-default \
             golang-${GO_VERSION}-go golang-go golang-golang-x-tools-dev && \
     rm -r /var/lib/apt/lists/*
 
 # osx cross compiling
+# here xar also gets pulled in
 RUN git clone https://github.com/tpoechtrager/osxcross && \
     cd osxcross/tarballs && \
     wget https://s3.dockerproject.org/darwin/v2/MacOSX10.10.sdk.tar.xz && \
@@ -42,11 +43,12 @@ RUN git clone https://github.com/tpoechtrager/osxcross && \
 RUN git clone https://github.com/hogliux/bomutils && \
     cd bomutils && make && sudo make install
 
+# see above - https://github.com/KwadroNaut/xar/tree/back-to-future should work too
 # xar (for osx packaging)
-RUN git clone https://github.com/VantaInc/xar && \
-    cd xar/xar && \
-    ./autogen.sh && ./configure && \
-    make && sudo make install
+#RUN git clone https://github.com/VantaInc/xar && \
+#    cd xar/xar && \
+#    ./autogen.sh && ./configure && \
+#    make && sudo make install
 
 # Grab the core18 and core20 snap (which snapcraft uses as a base) from the stable channel
 # and unpack it in the proper place, to speed up snapcraft builds in the containers.
@@ -73,10 +75,13 @@ RUN echo 'exec "$SNAP/usr/bin/python3" "$SNAP/bin/snapcraft" "$@"' >> /snap/bin/
 RUN chmod +x /snap/bin/snapcraft
 RUN ln -s /snap/bin/snapcraft /bin/
 
+# needs to be fixed
 # cache go modules
 RUN rm -rf /gomods && mkdir -p /gomods/packages
+RUN mkdir -p /gomods/packages
 WORKDIR /gomods
 COPY mods/go.* /gomods/
+RUN echo $(ls -al /)
 COPY mods/packages/ /gomods/packages/
 RUN go mod download
 
